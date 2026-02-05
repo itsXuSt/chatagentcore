@@ -4,7 +4,7 @@ import asyncio
 import uuid
 from typing import Dict, Optional
 from loguru import logger
-from chatagentcore.core.adapter_manager import AdapterManager
+from chatagentcore.core.adapter_manager import AdapterManager, get_adapter_manager
 
 
 class MessageRouter:

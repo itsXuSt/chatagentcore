@@ -1,5 +1,7 @@
 """FastAPI application"""
 
+import asyncio
+import time
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
@@ -9,7 +11,7 @@ from chatagentcore.core.config_manager import get_config_manager
 from chatagentcore.core.adapter_manager import get_adapter_manager
 from chatagentcore.storage.logger import LogConfig
 from chatagentcore.api.websocket.manager import get_manager
-from chatagentcore.api.models.message import WSAuthMessage, WSSubscribeMessage
+from chatagentcore.api.models.message import WSAuthMessage, WSSubscribeMessage, WSMessage
 from chatagentcore.api.schemas.config import Settings
 from chatagentcore.api.routes import message as message_routes
 from chatagentcore.api.routes import webhook as webhook_routes
@@ -18,7 +20,7 @@ from chatagentcore.adapters.base import Message as BaseMessage
 
 def _default_message_handler(message: BaseMessage) -> None:
     """
-    默认消息处理器 - 打印接收到的消息
+    默认消息处理器 - 打印接收到的消息并广播到 WebSocket
 
     Args:
         message: 收到的消息对象
@@ -64,6 +66,30 @@ def _default_message_handler(message: BaseMessage) -> None:
             logger.info(f"数据: {data_str}...")
 
     logger.info("=" * 70)
+
+    # 广播消息到 WebSocket 订阅者
+    ws_payload = {
+        "platform": message.platform,
+        "sender": message.sender,
+        "conversation": message.conversation,
+        "content": message.content,
+        "timestamp": int(time.time())
+    }
+
+    ws_msg = WSMessage(
+        type="message",
+        channel="messages",
+        timestamp=int(time.time()),
+        payload=ws_payload
+    )
+
+    # 获取当前运行的事件循环并创建广播任务
+    try:
+        loop = asyncio.get_event_loop()
+        if loop.is_running():
+            loop.create_task(ws_manager.broadcast(ws_msg, channel="messages"))
+    except Exception as e:
+        logger.error(f"Failed to broadcast message via WebSocket: {e}")
 
 
 @asynccontextmanager
@@ -120,12 +146,32 @@ async def lifespan(app: FastAPI):
     # 启动配置文件监控
     await config_manager.watch(interval=5.0)
 
+    # 同步有效的 API Token 到 WebSocket 管理器
+    if config_manager.config.auth.token:
+        ws_manager.set_valid_tokens([config_manager.config.auth.token])
+
+    # 启动清理过期连接的后台任务
+    async def prune_task():
+        while True:
+            try:
+                await asyncio.sleep(30)
+                count = await ws_manager.prune_stale_connections(timeout=90.0)
+                if count > 0:
+                    logger.info(f"Background task pruned {count} stale connections")
+            except asyncio.CancelledError:
+                break
+            except Exception as e:
+                logger.error(f"Error in prune_task: {e}")
+
+    prune_job = asyncio.create_task(prune_task())
+
     logger.info("ChatAgentCore started successfully")
 
     yield
 
     # 关闭时执行
     logger.info("Shutting down ChatAgentCore...")
+    prune_job.cancel()
     await event_bus.stop()
     await config_manager.stop_watch()
 
@@ -195,13 +241,23 @@ async def websocket_events(websocket: WebSocket):
         while True:
             # 接收客户端消息
             data: dict = await websocket.receive_json()
+            ws_manager.update_last_seen(websocket)
             msg_type = data.get("type")
 
             if msg_type == "auth":
                 # 处理认证
-                from chatagentcore.api.models.message import WSAuthMessage
                 auth_msg = WSAuthMessage(**data)
                 await ws_manager.handle_auth(websocket, auth_msg)
+
+            elif msg_type == "ping":
+                # 处理 Ping 并返回 Pong
+                pong_msg = WSMessage(
+                    type="pong",
+                    channel="system",
+                    timestamp=int(time.time()),
+                    payload={"ping_timestamp": data.get("timestamp")}
+                )
+                await ws_manager.send_json(websocket, pong_msg)
 
             elif msg_type == "subscribe":
                 # 处理订阅

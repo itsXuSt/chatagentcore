@@ -150,10 +150,17 @@ class WSSubscribeMessage(BaseModel):
     channels: list[str] = Field(..., description="要订阅的频道列表")
 
 
+class WSPingMessage(BaseModel):
+    """WebSocket Ping 消息"""
+
+    type: Literal["ping"] = "ping"
+    timestamp: int = Field(..., description="时间戳")
+
+
 class WSMessage(BaseModel):
     """WebSocket 消息"""
 
-    type: Literal["message", "event", "error", "auth_ack"] = Field(..., description="消息类型")
+    type: Literal["message", "event", "error", "auth_ack", "ping", "pong"] = Field(..., description="消息类型")
     channel: str = Field("", description="频道名称")
     timestamp: int = Field(..., description="时间戳")
     payload: Optional[Dict[str, Any]] = Field(None, description="消息内容")
@@ -176,5 +183,6 @@ __all__ = [
     "ErrorResponse",
     "WSAuthMessage",
     "WSSubscribeMessage",
+    "WSPingMessage",
     "WSMessage",
 ]
