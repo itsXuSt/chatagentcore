@@ -112,7 +112,9 @@ async def lifespan(app: FastAPI):
     # 获取适配器管理器并注册适配器类
     adapter_manager = get_adapter_manager()
     from chatagentcore.adapters.feishu import FeishuAdapter
+    from chatagentcore.adapters.dingtalk import DingTalkAdapter
     adapter_manager.register("feishu", FeishuAdapter)
+    adapter_manager.register("dingtalk", DingTalkAdapter)
 
     # 根据配置加载启用的平台适配器
     platforms_config = {}

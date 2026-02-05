@@ -81,12 +81,15 @@ class WecomConfig(PlatformConfig):
 class DingTalkConfig(PlatformConfig):
     """钉钉配置"""
 
-    app_key: str = Field(default="", description="应用 Key")
-    app_secret: str = Field(default="", description="应用密钥")
+    app_key: str = Field(default="", description="应用 Key (Client ID)")
+    app_secret: str = Field(default="", description="应用密钥 (Client Secret)")
+    connection_mode: Literal["websocket", "webhook"] = Field(default="websocket", description="连接模式：websocket(推荐) | webhook")
+    
+    # 以下用于 Webhook 模式，Stream 模式不需要
     token: str = Field(default="", description="令牌")
     aes_key: str = Field(default="", description="AES 密钥")
 
-    @field_validator("app_key", "app_secret", "token", "aes_key")
+    @field_validator("app_key", "app_secret")
     @classmethod
     def validate_dingtalk_keys(cls, v: str, info) -> str:
         """验证钉钉配置"""

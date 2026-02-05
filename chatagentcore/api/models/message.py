@@ -16,14 +16,14 @@ class ConversationInfo(BaseModel):
     """会话信息"""
 
     id: str = Field(..., description="会话 ID")
-    type: Literal["user", "group"] = Field(..., description="会话类型")
+    type: str = Field(..., description="会话类型")
     name: str = Field("", description="会话名称")
 
 
 class MessageContent(BaseModel):
     """消息内容"""
 
-    type: Literal["text", "image", "card", "audio", "file", "video"] = Field(..., description="内容类型")
+    type: str = Field(..., description="内容类型")
     text: str = Field("", description="文本内容")
     url: str = Field("", description="媒体 URL（图片、文件等）")
     data: Dict[str, Any] = Field(default_factory=dict, description="附加数据")
@@ -54,9 +54,9 @@ class SendMessageRequest(BaseModel):
 
     platform: str = Field(..., description="平台名称")
     to: str = Field(..., description="接收者 ID（用户 ID 或群 ID）")
-    message_type: Literal["text", "image", "card"] = Field("text", description="消息类型")
+    message_type: str = Field("text", description="消息类型: text, card, image等")
     content: str = Field(..., description="消息内容")
-    conversation_type: Literal["user", "group"] = Field("user", description="会话类型")
+    conversation_type: str = Field("user", description="会话类型: user/group, 兼容chat")
 
 
 class SendMessageResponse(BaseModel):
