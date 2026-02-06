@@ -148,6 +148,7 @@ class ConfigManager:
                 ("feishu", config.platforms.feishu),
                 ("wecom", config.platforms.wecom),
                 ("dingtalk", config.platforms.dingtalk),
+                ("qq", config.platforms.qq),
             ]
             if platform.enabled
         ]

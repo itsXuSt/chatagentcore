@@ -104,15 +104,21 @@ class DingTalkAdapter(BaseAdapter):
         # 判断会话类型 (1: 单聊, 2: 群聊)
         conv_type = "group" if ding_msg.conversation_type == "2" else "user"
         
+        # 对于单聊，会话 ID 应该是用户 ID，以便后续回复
+        conv_id = ding_msg.conversation_id
+        if conv_type == "user":
+            conv_id = ding_msg.sender_staff_id or ding_msg.sender_id
+
         return Message(
             platform="dingtalk",
             message_id=str(ding_msg.message_id),
             sender={
                 "id": ding_msg.sender_staff_id or ding_msg.sender_id,
                 "name": ding_msg.sender_nick or "DingTalkUser",
+                "type": "user",
             },
             conversation={
-                "id": ding_msg.conversation_id,
+                "id": conv_id,
                 "type": conv_type,
             },
             content={

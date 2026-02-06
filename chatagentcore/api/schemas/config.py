@@ -98,12 +98,28 @@ class DingTalkConfig(PlatformConfig):
         return v
 
 
+class QQConfig(PlatformConfig):
+    """QQ 机器人配置"""
+
+    app_id: str = Field(default="", description="机器人 AppID")
+    token: str = Field(default="", description="机器人 Token (AppSecret)")
+    
+    @field_validator("app_id", "token")
+    @classmethod
+    def validate_qq_keys(cls, v: str, info) -> str:
+        """验证 QQ 配置"""
+        if info.data.get("enabled") and not v:
+            raise ValueError(f"{info.field_name} is required when platform is enabled")
+        return v
+
+
 class PlatformsConfig(BaseModel):
     """所有平台配置"""
 
     feishu: FeishuConfig = Field(default_factory=FeishuConfig)
     wecom: WecomConfig = Field(default_factory=WecomConfig)
     dingtalk: DingTalkConfig = Field(default_factory=DingTalkConfig)
+    qq: QQConfig = Field(default_factory=QQConfig)
 
 
 class ServerConfig(BaseModel):
@@ -143,4 +159,5 @@ __all__ = [
     "FeishuConfig",
     "WecomConfig",
     "DingTalkConfig",
+    "QQConfig",
 ]

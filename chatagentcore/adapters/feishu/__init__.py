@@ -323,6 +323,11 @@ class FeishuAdapter(BaseAdapter):
         # 判断会话类型
         chat_type = message_obj.get("chat_type", "user") or ("group" if chat_id and chat_id.startswith("oc_") else "user")
 
+        # 归一化会话 ID：私聊使用 open_id，群聊使用 chat_id
+        final_conv_id = chat_id
+        if chat_type == "user":
+            final_conv_id = sender_id
+
         return Message(
             platform="feishu",
             message_id=message_id,
@@ -332,7 +337,7 @@ class FeishuAdapter(BaseAdapter):
                 "type": sender_type,
             },
             conversation={
-                "id": chat_id,
+                "id": final_conv_id,
                 "type": chat_type,
             },
             content={

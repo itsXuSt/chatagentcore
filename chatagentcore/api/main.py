@@ -113,8 +113,10 @@ async def lifespan(app: FastAPI):
     adapter_manager = get_adapter_manager()
     from chatagentcore.adapters.feishu import FeishuAdapter
     from chatagentcore.adapters.dingtalk import DingTalkAdapter
+    from chatagentcore.adapters.qq import QQAdapter
     adapter_manager.register("feishu", FeishuAdapter)
     adapter_manager.register("dingtalk", DingTalkAdapter)
+    adapter_manager.register("qq", QQAdapter)
 
     # 根据配置加载启用的平台适配器
     platforms_config = {}
@@ -122,6 +124,7 @@ async def lifespan(app: FastAPI):
         ("feishu", config_manager.platforms.feishu),
         ("wecom", config_manager.platforms.wecom),
         ("dingtalk", config_manager.platforms.dingtalk),
+        ("qq", config_manager.platforms.qq),
     ]:
         if cfg.enabled:
             # 直接使用 model_dump() 获取完整配置，已包含所有字段

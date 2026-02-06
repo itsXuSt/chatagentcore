@@ -53,6 +53,14 @@ platforms:
     app_secret: "your_app_secret"   # 从钉钉开放平台获取
     connection_mode: "websocket"     # 连接模式：websocket (推荐，Stream Mode) | webhook
 
+  # >>> QQ 机器人配置 <<<
+  # 接入方式：QQ 机器人
+  qq:
+    enabled: false
+    type: "app"
+    app_id: "your_app_id"           # 从 QQ 机器人后台获取 (AppID)
+    token: "your_token"             # 从 QQ 机器人后台获取 (Token/AppSecret)
+
 # ==================== 帮助文档 ====================
 #
 # 飞书平台接入步骤：
