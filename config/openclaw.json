@@ -1,33 +1,13 @@
 {
   "meta": {
     "lastTouchedVersion": "2026.2.2-3",
-    "lastTouchedAt": "2026-02-05T15:46:22.195Z"
+    "lastTouchedAt": "2026-02-07T04:04:48.903Z"
   },
   "wizard": {
-    "lastRunAt": "2026-02-05T13:14:41.934Z",
+    "lastRunAt": "2026-02-07T04:04:48.895Z",
     "lastRunVersion": "2026.2.2-3",
-    "lastRunCommand": "onboard",
+    "lastRunCommand": "doctor",
     "lastRunMode": "local"
-  },
-  "gateway": {
-    "port": 18789,
-    "mode": "local",
-    "bind": "loopback",
-    "auth": {
-      "mode": "token",
-      "token": "c396b152d54ca025a45b02f454ebd69f6c632e33c57bbc54"
-    },
-    "tailscale": {
-      "mode": "off",
-      "resetOnExit": false
-    },
-    "http": {
-      "endpoints": {
-        "chatCompletions": {
-          "enabled": true
-        }
-      }
-    }
   },
   "models": {
     "providers": {
@@ -35,9 +15,9 @@
         "baseUrl": "https://ai.uniontech.com/api/v1",
         "apiKey": "ut-63029d31-5a4f-4ed6-955a-2abeb1660042",
         "api": "openai-completions",
-        "headers": {  // 关键字：headers
-            "Content-Type": "application/json"  // 指定内容类型
-        },	
+        "headers": {
+          "Content-Type": "application/json"
+        },
         "models": [
           {
             "id": "GLM-4.7",
@@ -71,12 +51,23 @@
       }
     }
   },
+  "tools": {
+    "elevated": {
+      "enabled": true,
+      "allowFrom": {
+        "feishu": [
+          "feishu"
+        ]
+      }
+    }
+  },
   "messages": {
     "ackReactionScope": "group-mentions"
   },
   "commands": {
     "native": "auto",
-    "nativeSkills": "auto"
+    "nativeSkills": "auto",
+    "restart": true
   },
   "channels": {
     "feishu": {
@@ -85,6 +76,26 @@
       "appSecret": "Fd1XCkfmxlKTxzixnsQ9veKok5ujiaIY",
       "domain": "feishu",
       "groupPolicy": "allowlist"
+    }
+  },
+  "gateway": {
+    "port": 18789,
+    "mode": "local",
+    "bind": "loopback",
+    "auth": {
+      "mode": "token",
+      "token": "c396b152d54ca025a45b02f454ebd69f6c632e33c57bbc54"
+    },
+    "tailscale": {
+      "mode": "off",
+      "resetOnExit": false
+    },
+    "http": {
+      "endpoints": {
+        "chatCompletions": {
+          "enabled": true
+        }
+      }
     }
   },
   "skills": {
